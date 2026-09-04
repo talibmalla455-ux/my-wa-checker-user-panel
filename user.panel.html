@@ -1,0 +1,82 @@
+<!-- C:/Users/2/Downloads/TMWhatsappTool/user_panel.html -->
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0"><title>TK USER PANEL // WhatsApp Pairing</title>
+<link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&display=swap" rel="stylesheet">
+<style>
+    body { background: #020604; color: #00FF41; font-family: 'Share Tech Mono', monospace; display: flex; justify-content: center; align-items: center; height: 100vh; margin: 0; overflow: hidden; }
+    .panel { border: 2px solid #00FF41; background: rgba(0, 255, 65, 0.05); padding: 40px; box-shadow: 0 0 30px rgba(0, 255, 65, 0.3); text-align: center; max-width: 450px; width: 90%; position: relative; border-radius: 10px; }
+    h1 { font-size: 28px; letter-spacing: 4px; margin-bottom: 10px; text-shadow: 0 0 15px #00FF41; color: #fff; }
+    .sub { color: #00F3FF; font-size: 10px; letter-spacing: 2px; margin-bottom: 30px; }
+    input { background: rgba(0, 255, 65, 0.1); border: 1px solid #00FF41; color: #fff; padding: 15px; width: 100%; box-sizing: border-box; font-family: inherit; font-size: 20px; margin-bottom: 20px; outline: none; text-align: center; border-radius: 5px; }
+    button { background: #00FF41; color: #000; border: none; padding: 18px 30px; font-family: inherit; font-size: 16px; font-weight: bold; cursor: pointer; width: 100%; letter-spacing: 2px; transition: 0.3s; border-radius: 5px; }
+    button:hover { background: #fff; box-shadow: 0 0 25px #fff; transform: translateY(-2px); }
+    #codeSection { margin-top: 40px; padding: 20px; border: 2px dashed #00F3FF; background: rgba(0, 243, 255, 0.05); display: none; animation: fadeIn 0.5s ease-out; }
+    .code-label { color: #00F3FF; font-size: 12px; margin-bottom: 15px; }
+    #codeDisplay { font-size: 42px; font-weight: bold; letter-spacing: 8px; color: #fff; text-shadow: 0 0 20px #00F3FF; margin: 10px 0; }
+    .status { margin-top: 20px; font-size: 12px; color: #00FF41; min-height: 15px; }
+    @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+</style>
+</head>
+<body>
+    <div class="panel">
+        <h1>TK USER PANEL</h1>
+        <div class="sub">SECURE WHATSAPP LINKING INTERFACE</div>
+        <input type="text" id="phone" placeholder="ENTER NUMBER (e.g. 923001234567)" />
+        <button id="connectBtn" onclick="getCode()">INITIATE PAIRING REQUEST</button>
+        <div id="status" class="status">STATUS: SYSTEM READY_</div>
+        <div id="codeSection">
+            <div class="code-label">WHATSAPP_PAIRING_CODE:</div>
+            <div id="codeDisplay">XXXX-XXXX</div>
+            <div style="font-size: 9px; color: rgba(255,255,255,0.6); margin-top: 15px;">
+                OPEN WHATSAPP > LINKED DEVICES > LINK WITH PHONE NUMBER<br>AND ENTER THE CODE ABOVE
+            </div>
+        </div>
+    </div>
+
+<script>
+    async function getCode() {
+        const phoneInput = document.getElementById('phone');
+        const phone = phoneInput.value.trim().replace(/\D/g, ''); // Clean number
+        const status = document.getElementById('status');
+        const codeSection = document.getElementById('codeSection');
+        const codeDisplay = document.getElementById('codeDisplay');
+        const btn = document.getElementById('connectBtn');
+
+        if (!phone || phone.length < 10) {
+            alert('CRITICAL ERROR: VALID PHONE NUMBER REQUIRED');
+            return;
+        }
+
+        btn.disabled = true;
+        btn.textContent = 'EXECUTING REQUEST...';
+        status.textContent = 'STATUS: CONNECTING TO REMOTE SERVER...';
+        codeSection.style.display = 'none';
+
+        try {
+            const railwayUrl = "https://my-wa-checker-production-27aa.up.railway.app";
+            const cleanUrl = railwayUrl.replace(/\/$/, "");
+            const finalUrl = `${cleanUrl}/get-code?number=${phone}`;
+
+            const response = await fetch(finalUrl);
+            const data = await response.json();
+
+            if (data.code) {
+                status.textContent = 'STATUS: PAIRING_CODE_ACQUIRED';
+                codeDisplay.textContent = data.code;
+                codeSection.style.display = 'block';
+                btn.textContent = 'REQUEST COMPLETE';
+            } else {
+                throw new Error(data.details || data.error || 'UNKNOWN_FAILURE');
+            }
+        } catch (e) {
+            console.error("Fetch error:", e);
+            status.textContent = 'STATUS: ERROR (' + e.message + ')';
+            btn.disabled = false;
+            btn.textContent = 'RETRY PAIRING REQUEST';
+        }
+    }
+</script>
+</body>
+</html>
